@@ -43,7 +43,8 @@
                 <tr>
                     <td>{{ income.name }}</td>
                     <td> {{ income.amount }} </td>
-                    <td><button class="btn-square-sm btn-danger">X</button></td>
+                    <td class="button"><button onclick="window.location.href='/delete-income/{{income.inc_id}}&{{id}}'" class="btn btn-square-sm btn-danger" style="font-weight: bold;">X</button></td>
+                    <td class="button"><button onclick="window.location.href='/Income/{{id}}'" class="btn btn-square-sm btn-success" style="font-size: 1.5em;padding-bottom:13px">+</button></td>
                 </tr>
 {% endfor %}
             </table>

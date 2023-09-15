@@ -170,23 +170,23 @@ def del_exp(inc_id,id):
     inc_total = db.session.execute(text(f'select sum(amount) from income inner join property on property.prop_id = income.prop_id where income.user_id = {current_user.user_id}'))
     roi= calc_roi(prop[0][0].purch_price,exp_total.all()[0][0],inc_total.all()[0][0])
     roif = "%.2f" % roi
-    query=text(f'UPDATE property SET roi = {roif} WHERE property.prop_id = {prop_id}')
+    query=text(f'UPDATE property SET roi = {roif} WHERE property.prop_id = {id}')
     db.session.execute(query)
     db.session.commit()
     return redirect('/properties')
 
 @site.route('/delete-income/<inc_id>&<id>',methods=['GET','POST'])
 @login_required
-def del_inc(inc_id):
+def del_inc(inc_id,id):
     prop = db.session.execute(select(Property).where(Property.prop_id==id))
     db.session.execute(text(f'DELETE FROM income WHERE income.inc_id = {inc_id}'))
     db.session.commit()
 
     exp_total = db.session.execute(text(f'select sum(amount) from expense inner join property on property.prop_id = expense.prop_id where expense.user_id = {current_user.user_id}'))
     inc_total = db.session.execute(text(f'select sum(amount) from income inner join property on property.prop_id = income.prop_id where income.user_id = {current_user.user_id}'))
-    roi= calc_roi(prop[0][0].purch_price,exp_total.all()[0][0],inc_total.all()[0][0])
+    roi= calc_roi(prop.all()[0][0].purch_price,exp_total.all()[0][0],inc_total.all()[0][0])
     roif = "%.2f" % roi
-    query=text(f'UPDATE property SET roi = {roif} WHERE property.prop_id = {prop_id}')
+    query=text(f'UPDATE property SET roi = {roif} WHERE property.prop_id = {id}')
     db.session.execute(query)
     db.session.commit()
     return redirect('/properties')
