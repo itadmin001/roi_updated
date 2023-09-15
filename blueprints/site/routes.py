@@ -123,6 +123,14 @@ def add_exp(id):
         new_expense=Expenses(name=expense_name,amount=expense_amount,prop_id=id,user_id=current_user.user_id)
         db.session.add(new_expense)
         db.session.commit()
+
+        exp_total = db.session.execute(text(f'select sum(amount) from expense inner join property on property.prop_id = expense.prop_id where expense.user_id = {current_user.user_id}'))
+        inc_total = db.session.execute(text(f'select sum(amount) from income inner join property on property.prop_id = income.prop_id where income.user_id = {current_user.user_id}'))
+        roi= calc_roi(prop[0][0].purch_price,exp_total.all()[0][0],inc_total.all()[0][0])
+        roif = "%.2f" % roi
+        query=text(f'UPDATE property SET roi = {roif} WHERE property.prop_id = {prop_id}')
+        db.session.execute(query)
+        db.session.commit()
         return redirect('/properties')
     
     return render_template('add_expense.html',form=form,id=id,address=address)
@@ -149,16 +157,36 @@ def prop_delete(id):
     db.session.commit()
     return redirect('/properties')
 
-@site.route('/delete-expense/<inc_id>',methods=['GET','POST'])
+###################    TODO - NEED TO MOVE ROI CALC CODE/QUERIES TO HELPER.PY  ###########################
+
+@site.route('/delete-expense/<inc_id>&<id>',methods=['GET','POST'])
 @login_required
-def del_exp(inc_id):
+def del_exp(inc_id,id):
+    prop = db.session.execute(select(Property).where(Property.prop_id==id))
     db.session.execute(text(f'DELETE FROM expense WHERE expense.inc_id = {inc_id}'))
+    db.session.commit()
+
+    exp_total = db.session.execute(text(f'select sum(amount) from expense inner join property on property.prop_id = expense.prop_id where expense.user_id = {current_user.user_id}'))
+    inc_total = db.session.execute(text(f'select sum(amount) from income inner join property on property.prop_id = income.prop_id where income.user_id = {current_user.user_id}'))
+    roi= calc_roi(prop[0][0].purch_price,exp_total.all()[0][0],inc_total.all()[0][0])
+    roif = "%.2f" % roi
+    query=text(f'UPDATE property SET roi = {roif} WHERE property.prop_id = {prop_id}')
+    db.session.execute(query)
     db.session.commit()
     return redirect('/properties')
 
-@site.route('/delete-income/<inc_id>',methods=['GET','POST'])
+@site.route('/delete-income/<inc_id>&<id>',methods=['GET','POST'])
 @login_required
 def del_inc(inc_id):
+    prop = db.session.execute(select(Property).where(Property.prop_id==id))
     db.session.execute(text(f'DELETE FROM income WHERE income.inc_id = {inc_id}'))
+    db.session.commit()
+
+    exp_total = db.session.execute(text(f'select sum(amount) from expense inner join property on property.prop_id = expense.prop_id where expense.user_id = {current_user.user_id}'))
+    inc_total = db.session.execute(text(f'select sum(amount) from income inner join property on property.prop_id = income.prop_id where income.user_id = {current_user.user_id}'))
+    roi= calc_roi(prop[0][0].purch_price,exp_total.all()[0][0],inc_total.all()[0][0])
+    roif = "%.2f" % roi
+    query=text(f'UPDATE property SET roi = {roif} WHERE property.prop_id = {prop_id}')
+    db.session.execute(query)
     db.session.commit()
     return redirect('/properties')
